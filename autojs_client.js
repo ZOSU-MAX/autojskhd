@@ -3,7 +3,7 @@
 
 // ========== 设备初始化模块 ==========
 const DEVICE_ID = device.getAndroidId();
-const SERVER_URL = "wss://your-server.com/ws";
+const SERVER_URL = "ws://82.156.222.84:8000/ws";
 const HEARTBEAT_INTERVAL = 30000; // 30秒心跳
 const MAX_RETRY = 5; // 最大重连次数
 
@@ -23,7 +23,7 @@ function initWebSocket() {
         const ws = $websocket.connect(SERVER_URL, {
             headers: {
                 "Device-ID": DEVICE_ID,
-                "Authorization": authToken ? `Bearer ${authToken}` : ""
+                "Authorization": authToken ? "Bearer " + authToken : ""
             }
         });
 
@@ -38,7 +38,7 @@ function initWebSocket() {
         });
 
         ws.on("close", (code, reason) => {
-            deviceLog(`连接关闭: ${code}-${reason}`);
+            deviceLog("连接关闭: " + code + "-" + reason);
             scheduleReconnect();
         });
 
@@ -91,7 +91,7 @@ function executeScript(scriptData) {
     const scriptId = scriptData.id;
     
     // 沙箱环境执行
-    const engine = engines.execScript(`Script_${scriptId}`, 
+    const engine = engines.execScript("Script_" + scriptId, 
         `(function() {
             try {
                 ${scriptData.content}
@@ -109,11 +109,11 @@ function executeScript(scriptData) {
     // 监听执行状态
     engine.on("exit", () => {
         runningScripts.delete(scriptId);
-        pushLog(`脚本 ${scriptId} 已停止`, scriptId);
+        pushLog("脚本 " + scriptId + " 已停止", scriptId);
     });
 
     runningScripts.set(scriptId, engine);
-    pushLog(`脚本 ${scriptId} 已启动`, scriptId);
+    pushLog("脚本 " + scriptId + " 已启动", scriptId);
 }
 
 /**
@@ -125,7 +125,7 @@ function terminateScript(scriptId) {
     if (runningScripts.has(scriptId)) {
         runningScripts.get(scriptId).forceStop();
         runningScripts.delete(scriptId);
-        pushLog(`脚本 ${scriptId} 已被终止`, scriptId);
+        pushLog("脚本 " + scriptId + " 已被终止", scriptId);
     }
 }
 
@@ -141,7 +141,7 @@ function handleAuthentication() {
         model: device.model,
         brand: device.brand,
         sdk: device.sdkInt,
-        resolution: `${device.width}x${device.height}`
+        resolution: device.width + "x" + device.height
     };
 
     $http.post("https://your-server.com/auth/device", deviceInfo, {
@@ -167,7 +167,7 @@ function updateDeviceConfig(config) {
     // 实现配置更新逻辑
     if (config.heartbeatInterval) {
         HEARTBEAT_INTERVAL = config.heartbeatInterval;
-        deviceLog(`心跳间隔已更新为 ${HEARTBEAT_INTERVAL}ms`);
+        deviceLog("心跳间隔已更新为 " + HEARTBEAT_INTERVAL + "ms");
     }
 }
 
@@ -210,7 +210,7 @@ function pushLog(content, scriptId = "SYSTEM") {
  * @param {string} message - 日志消息
  */
 function deviceLog(message) {
-    console.log(`[Device] ${message}`);
+    console.log("[Device] " + message);
     pushLog(message);
 }
 
@@ -249,7 +249,7 @@ function scheduleReconnect() {
     const delay = Math.min(30000, 2000 * Math.pow(2, retryCount)); // 指数退避
     retryCount++;
     
-    deviceLog(`将在 ${delay/1000} 秒后重连...`);
+    deviceLog("将在 " + (delay/1000) + " 秒后重连...");
     setTimeout(() => {
         ws = initWebSocket();
     }, delay);
@@ -277,7 +277,7 @@ function hotReloadScript(scriptId, newContent) {
     if (runningScripts.has(scriptId)) {
         terminateScript(scriptId);
         executeScript({id: scriptId, content: newContent});
-        deviceLog(`脚本 ${scriptId} 已热更新`);
+        deviceLog("脚本 " + scriptId + " 已热更新");
     }
 }
 
@@ -302,7 +302,7 @@ setInterval(() => {
 // 异常处理机制
 // 全局异常捕获
 events.on("exception", (err) => {
-    pushLog(`CRITICAL_ERROR: ${err}`, "SYSTEM");
+    pushLog("CRITICAL_ERROR: " + err, "SYSTEM");
 });
 
 // 网络异常处理

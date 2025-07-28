@@ -49,7 +49,7 @@ function initWebSocket() {
         });
 
         ws.on("close", (code, reason) => {
-            deviceLog(`连接关闭: ${code}-${reason}`);
+            deviceLog("连接关闭: " + code + "-" + reason);
             scheduleReconnect();
         });
 
@@ -93,7 +93,7 @@ function executeScript(scriptData) {
     const scriptId = scriptData.id;
     
     // 沙箱环境执行
-    const engine = engines.execScript(`Script_${scriptId}`, 
+    const engine = engines.execScript("Script_" + scriptId, 
         `(function() {
             try {
                 ${scriptData.content}
@@ -111,11 +111,11 @@ function executeScript(scriptData) {
     // 监听执行状态
     engine.on("exit", () => {
         runningScripts.delete(scriptId);
-        pushLog(`脚本 ${scriptId} 已停止`, scriptId);
+        pushLog("脚本 " + scriptId + " 已停止", scriptId);
     });
 
     runningScripts.set(scriptId, engine);
-    pushLog(`脚本 ${scriptId} 已启动`, scriptId);
+    pushLog("脚本 " + scriptId + " 已启动", scriptId);
 }
 
 function terminateScript(scriptId) {
@@ -132,7 +132,7 @@ function handleAuthentication() {
         model: device.model,
         brand: device.brand,
         sdk: device.sdkInt,
-        resolution: `${device.width}x${device.height}`
+        resolution: device.width + "x" + device.height
     };
 
     $http.post("https://your-server.com/auth/device", deviceInfo, {
