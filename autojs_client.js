@@ -96,7 +96,14 @@ function executeScript(scriptData) {
             try {
                 ${scriptData.content}
             } catch (e) {
-                sendLog("SCRIPT_ERROR: " + e);
+                /**
+                 * 处理脚本错误并发送日志
+                 * @param {Error} e - 错误对象
+                 */
+                function handleScriptError(e) {
+                    sendLog("SCRIPT_ERROR: " + e);
+                }
+                handleScriptError(e);
             }
         })();`,
         {
